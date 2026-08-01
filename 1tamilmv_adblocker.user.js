@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         1TamilMV Anti-Redirect & Adblocker (Master Nullifier)
+// @name         1TamilMV Anti-Redirect and Adblocker (Master Nullifier)
 // @namespace    http://tampermonkey.net/
 // @version      5.1
 // @description  Completely nullifies low-level ad execution paths on 1TamilMV by hooking prototypes (createElement, setAttribute, addEventListener) and pre-defining bypass global flags.
