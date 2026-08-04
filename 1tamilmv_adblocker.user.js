@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         1TamilMV Anti-Redirect and Adblocker (Master Nullifier)
 // @namespace    http://tampermonkey.net/
-// @version      5.1
+// @version      5.2
 // @description  Completely nullifies low-level ad execution paths on 1TamilMV by hooking prototypes (createElement, setAttribute, addEventListener) and pre-defining bypass global flags.
 // @author       Antigravity
+// @match        *://*.1tamilmv.li/*
 // @match        *://*.1tamilmv.observer/*
 // @match        *://*.1tamilmv.promo/*
 // @match        *://*.1tamilmv.reisen/*
@@ -14,6 +15,7 @@
 // @match        *://*.1tamilmv.link/*
 // @match        *://*.1tamilmv.*/*
 // @match        *://*.tamilmv.*/*
+// @include      /^https?:\/\/([^\/]+\.)?1?tamilmv\.[a-z0-9]+/
 // @updateURL    https://raw.githubusercontent.com/Akash-Sriram/1tamilmv-anti-redirect/main/1tamilmv_adblocker.user.js
 // @downloadURL  https://raw.githubusercontent.com/Akash-Sriram/1tamilmv-anti-redirect/main/1tamilmv_adblocker.user.js
 // @run-at       document-start
