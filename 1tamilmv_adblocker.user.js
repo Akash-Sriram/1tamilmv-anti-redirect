@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1TamilMV Anti-Redirect and Adblocker (Master Nullifier)
 // @namespace    http://tampermonkey.net/
-// @version      5.2
+// @version      5.3
 // @description  Completely nullifies low-level ad execution paths on 1TamilMV by hooking prototypes (createElement, setAttribute, addEventListener) and pre-defining bypass global flags.
 // @author       Antigravity
 // @match        *://*.1tamilmv.li/*
@@ -28,9 +28,6 @@
     // Access the page's real window object
     const rootWindow = (typeof unsafeWindow !== 'undefined') ? unsafeWindow : window;
 
-    const currentHost = rootWindow.location.hostname;
-    const baseDomain = currentHost.replace(/^www\./, '');
-
     const log = (msg, level = 'info') => {
         const styles = {
             info: 'color: #3b82f6; font-weight: bold;',
@@ -40,9 +37,11 @@
         console.log(`%c[Anti-Redirect Master] ${msg}`, styles[level] || styles.info);
     };
 
-    // Trusted whitelist domains
+    // Regex matching any 1tamilmv/tamilmv domain or subdomain with any extension/TLD
+    const mirrorDomainRegex = /^(?:[a-z0-9-]+\.)*1?tamilmv\.[a-z0-9]+$/i;
+
+    // Trusted third-party whitelist domains
     const allowedDomains = [
-        baseDomain,
         'googletagmanager.com',
         'google-analytics.com',
         'jsdelivr.net',
@@ -60,7 +59,15 @@
         if (url === 'about:blank') return true;
         try {
             const parsed = new URL(url, rootWindow.location.origin);
-            return allowedDomains.some(domain => parsed.hostname.endsWith(domain));
+            const hostname = parsed.hostname;
+
+            // Check if matches the dynamic mirror domain regex
+            if (mirrorDomainRegex.test(hostname)) {
+                return true;
+            }
+
+            // Check against allowed third-party domains
+            return allowedDomains.some(domain => hostname.endsWith(domain));
         } catch (e) {
             return false; // Block malformed or suspicious URLs
         }
@@ -352,6 +359,9 @@
     // 9. INJECT CSP META
     // ==========================================
     try {
+        const currentHost = rootWindow.location.hostname;
+        const baseDomain = currentHost.replace(/^www\./, '');
+
         const cspRules = [
             `script-src 'self' 'unsafe-inline' 'unsafe-eval' *://${baseDomain} *://*.${baseDomain} https://*.googletagmanager.com https://*.google-analytics.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com`,
             `connect-src 'self' *://${baseDomain} *://*.${baseDomain} https://*.googletagmanager.com https://*.google-analytics.com`,
