@@ -8,7 +8,10 @@ A robust, low-level Tampermonkey/Violentmonkey userscript designed to bypass agg
 - **Window.open Hijack Protection**: Blocks `about:blank` window-open tricks used by ad-scripts to bypass pop-up blockers, and propagates protections to new window frames automatically.
 - **Content Security Policy (CSP)**: Dynamically injects Content Security Policies to block unwanted external connections and third-party iframe behaviors.
 
-## Installation / Auto-Updates
+## 🚀 Installation & Auto-Updates
 
-Install the userscript directly via this link to enable auto-updates:
-[Install Userscript](https://raw.githubusercontent.com/Akash-Sriram/1tamilmv-anti-redirect/main/1tamilmv_adblocker.user.js)
+Click the link below to install/update the userscript:
+
+👉 **[Install/Update Userscript (Direct Raw Link)](https://raw.githubusercontent.com/Akash-Sriram/1tamilmv-anti-redirect/main/1tamilmv_adblocker.user.js)**
+
+*(Navigating directly to this raw file in your browser will trigger the installation screen of Tampermonkey/Violentmonkey and configure the auto-update mechanism).*
