@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1TamilMV Anti-Redirect and Adblocker (Master Nullifier)
 // @namespace    http://tampermonkey.net/
-// @version      5.4
+// @version      5.5
 // @description  Completely nullifies low-level ad execution paths on 1TamilMV by hooking prototypes (createElement, setAttribute, addEventListener) and pre-defining bypass global flags.
 // @author       Antigravity
 // @match        *://*.1tamilmv.pizza/*
@@ -268,6 +268,119 @@
         log('Hooked EventTarget.prototype.addEventListener.', 'info');
     } catch (e) {
         log('Failed to hook addEventListener: ' + e.message, 'error');
+    }
+
+    // ==========================================
+    // 5b. HOOK INLINE EVENT PROPERTIES (onclick, onmousedown, etc.)
+    // ==========================================
+    try {
+        const eventProps = ['onclick', 'onmousedown', 'onmouseup', 'ontouchstart', 'onpointerdown'];
+        
+        eventProps.forEach(prop => {
+            // Hook HTMLElement prototype
+            try {
+                const originalDesc = Object.getOwnPropertyDescriptor(HTMLElement.prototype, prop);
+                Object.defineProperty(HTMLElement.prototype, prop, {
+                    set(fn) {
+                        if (typeof fn === 'function') {
+                            const stack = new Error().stack || '';
+                            if (isSuspiciousStack(stack)) {
+                                log(`Blocked suspicious HTMLElement.${prop} assignment`, 'warn');
+                                return;
+                            }
+                        }
+                        if (originalDesc && originalDesc.set) {
+                            originalDesc.set.call(this, fn);
+                        } else {
+                            this[`_${prop}`] = fn;
+                        }
+                    },
+                    get() {
+                        return originalDesc && originalDesc.get ? originalDesc.get.call(this) : this[`_${prop}`];
+                    },
+                    configurable: true
+                });
+            } catch (e) {}
+
+            // Hook Document prototype
+            try {
+                const originalDesc = Object.getOwnPropertyDescriptor(Document.prototype, prop);
+                Object.defineProperty(Document.prototype, prop, {
+                    set(fn) {
+                        if (typeof fn === 'function') {
+                            const stack = new Error().stack || '';
+                            if (isSuspiciousStack(stack)) {
+                                log(`Blocked suspicious Document.${prop} assignment`, 'warn');
+                                return;
+                            }
+                        }
+                        if (originalDesc && originalDesc.set) {
+                            originalDesc.set.call(this, fn);
+                        } else {
+                            this[`_${prop}`] = fn;
+                        }
+                    },
+                    get() {
+                        return originalDesc && originalDesc.get ? originalDesc.get.call(this) : this[`_${prop}`];
+                    },
+                    configurable: true
+                });
+            } catch (e) {}
+
+            // Hook Window prototype
+            try {
+                const originalDesc = Object.getOwnPropertyDescriptor(Window.prototype, prop);
+                Object.defineProperty(Window.prototype, prop, {
+                    set(fn) {
+                        if (typeof fn === 'function') {
+                            const stack = new Error().stack || '';
+                            if (isSuspiciousStack(stack)) {
+                                log(`Blocked suspicious Window.${prop} assignment`, 'warn');
+                                return;
+                            }
+                        }
+                        if (originalDesc && originalDesc.set) {
+                            originalDesc.set.call(this, fn);
+                        } else {
+                            this[`_${prop}`] = fn;
+                        }
+                    },
+                    get() {
+                        return originalDesc && originalDesc.get ? originalDesc.get.call(this) : this[`_${prop}`];
+                    },
+                    configurable: true
+                });
+            } catch (e) {}
+        });
+        log('Hooked inline event properties (onclick, etc.).', 'info');
+    } catch (e) {
+        log('Failed to hook inline event properties: ' + e.message, 'error');
+    }
+
+    // ==========================================
+    // 5c. HOOK LOCATION PROTOTYPE METHODS
+    // ==========================================
+    try {
+        const originalAssign = Location.prototype.assign;
+        Location.prototype.assign = function(url) {
+            if (url && !isAllowed(url)) {
+                log(`Blocked location.assign targeting: ${url}`, 'warn');
+                return;
+            }
+            return originalAssign.apply(this, arguments);
+        };
+
+        const originalReplace = Location.prototype.replace;
+        Location.prototype.replace = function(url) {
+            if (url && !isAllowed(url)) {
+                log(`Blocked location.replace targeting: ${url}`, 'warn');
+                return;
+            }
+            return originalReplace.apply(this, arguments);
+        };
+        log('Hooked Location.prototype methods.', 'info');
+    } catch (e) {
+        log('Failed to hook Location prototype methods: ' + e.message, 'error');
     }
 
     // ==========================================
