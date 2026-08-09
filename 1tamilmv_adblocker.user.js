@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1TamilMV Anti-Redirect and Adblocker (Master Nullifier)
 // @namespace    http://tampermonkey.net/
-// @version      5.5
+// @version      5.6
 // @description  Completely nullifies low-level ad execution paths on 1TamilMV by hooking prototypes (createElement, setAttribute, addEventListener) and pre-defining bypass global flags.
 // @author       Antigravity
 // @match        *://*.1tamilmv.pizza/*
@@ -165,29 +165,48 @@
     }
 
     // ==========================================
-    // 3. HOOK DOCUMENT.CREATEELEMENT
+    // 3. HOOK SCRIPT & IFRAME PROTOTYPES (Prototype level)
     // ==========================================
+    try {
+        const originalScriptSrc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+        Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+            set(value) {
+                if (value && !isAllowed(value)) {
+                    log(`Blocked script.src assignment targeting: ${value}`, 'warn');
+                    return;
+                }
+                originalScriptSrc.set.call(this, value);
+            },
+            get() {
+                return originalScriptSrc.get.call(this);
+            },
+            configurable: true
+        });
+
+        const originalIframeSrc = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+        Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
+            set(value) {
+                if (value && !isAllowed(value)) {
+                    log(`Blocked iframe.src assignment targeting: ${value}`, 'warn');
+                    return;
+                }
+                originalIframeSrc.set.call(this, value);
+            },
+            get() {
+                return originalIframeSrc.get.call(this);
+            },
+            configurable: true
+        });
+        log('Hooked script and iframe prototype src properties.', 'info');
+    } catch (e) {
+        log('Failed to hook script/iframe prototype src: ' + e.message, 'error');
+    }
+
     try {
         const originalCreateElement = Document.prototype.createElement;
         Document.prototype.createElement = function(tagName) {
             const el = originalCreateElement.apply(this, arguments);
             const tag = tagName.toLowerCase();
-
-            if (tag === 'script') {
-                Object.defineProperty(el, 'src', {
-                    set(value) {
-                        if (!isAllowed(value)) {
-                            log(`Blocked script.src write targeting: ${value}`, 'warn');
-                            return;
-                        }
-                        Element.prototype.setAttribute.call(this, 'src', value);
-                    },
-                    get() {
-                        return this.getAttribute('src');
-                    },
-                    configurable: true
-                });
-            }
 
             if (tag === 'a') {
                 const originalClick = el.click;
