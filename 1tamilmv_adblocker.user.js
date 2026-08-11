@@ -1,27 +1,10 @@
 // ==UserScript==
 // @name         1TamilMV Anti-Redirect and Adblocker (Master Nullifier)
 // @namespace    http://tampermonkey.net/
-// @version      5.6
+// @version      6.0
 // @description  Completely nullifies low-level ad execution paths on 1TamilMV by hooking prototypes (createElement, setAttribute, addEventListener) and pre-defining bypass global flags.
 // @author       Antigravity
-// @match        *://*.1tamilmv.pizza/*
-// @match        *://*.1tamilmv.yt/*
-// @match        *://*.1tamilmv.ws/*
-// @match        *://*.1tamilmv.cz/*
-// @match        *://*.1tamilmv.me/*
-// @match        *://*.1tamilmv.click/*
-// @match        *://*.1tamilmv.li/*
-// @match        *://*.1tamilmv.observer/*
-// @match        *://*.1tamilmv.promo/*
-// @match        *://*.1tamilmv.reisen/*
-// @match        *://*.1tamilmv.world/*
-// @match        *://*.1tamilmv.lol/*
-// @match        *://*.1tamilmv.life/*
-// @match        *://*.1tamilmv.win/*
-// @match        *://*.1tamilmv.link/*
-// @match        *://*.1tamilmv.*/*
-// @match        *://*.tamilmv.*/*
-// @include      /^https?:\/\/([^\/]+\.)?1?tamilmv\.[a-z0-9]+/
+// @match        *://*/*
 // @updateURL    https://raw.githubusercontent.com/Akash-Sriram/1tamilmv-anti-redirect/main/1tamilmv_adblocker.user.js
 // @downloadURL  https://raw.githubusercontent.com/Akash-Sriram/1tamilmv-anti-redirect/main/1tamilmv_adblocker.user.js
 // @run-at       document-start
@@ -33,6 +16,12 @@
 
     // Access the page's real window object
     const rootWindow = (typeof unsafeWindow !== 'undefined') ? unsafeWindow : window;
+
+    // Immediately exit if we are not on a 1tamilmv or tamilmv domain
+    const currentHost = rootWindow.location.hostname;
+    if (!/1?tamilmv/i.test(currentHost)) {
+        return;
+    }
 
     const log = (msg, level = 'info') => {
         const styles = {
